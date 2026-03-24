@@ -58,9 +58,17 @@ export default function RegisterPage() {
         email: formData.email,
         password: formData.password,
       });
-      login(response.data.user, response.data.token);
+      // 处理两种可能的响应格式
+      const user = response.data?.user || response.user;
+      const token = response.data?.token || response.token;
+      if (!user || !token) {
+        setError(t('registerError'));
+        return;
+      }
+      login(user, token);
       router.push('/onboarding');
     } catch (err: any) {
+      console.error('Register error:', err);
       setError(err.message || t('registerError'));
     } finally {
       setIsLoading(false);

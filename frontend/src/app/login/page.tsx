@@ -28,9 +28,17 @@ export default function LoginPage() {
 
     try {
       const response: any = await authApi.login(formData);
-      login(response.data.user, response.data.token);
+      // 处理两种可能的响应格式
+      const user = response.data?.user || response.user;
+      const token = response.data?.token || response.token;
+      if (!user || !token) {
+        setError(t('loginError'));
+        return;
+      }
+      login(user, token);
       router.push('/dashboard');
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err.message || t('loginError'));
     } finally {
       setIsLoading(false);
