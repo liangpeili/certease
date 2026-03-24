@@ -202,6 +202,7 @@ cd frontend && npm run dev
 
 ## 后续可扩展功能
 
+- [x] i18n 国际化支持 (英文/中文)
 - [ ] 阿里云 DNS 适配器
 - [ ] 腾讯云 DNS 适配器
 - [ ] Webhook 推送引擎
