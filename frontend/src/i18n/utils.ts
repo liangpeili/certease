@@ -8,8 +8,9 @@ const COOKIE_NAME = 'NEXT_LOCALE';
 /**
  * 从 Accept-Language 头检测浏览器语言
  */
-function detectBrowserLocale(): Locale {
-  const headersList = headers();
+async function detectBrowserLocale(): Promise<Locale> {
+  // headers() 是异步函数，需要 await
+  const headersList = await headers();
   const acceptLanguage = headersList.get('accept-language') || '';
   
   // 解析 Accept-Language，例如: "zh-CN,zh;q=0.9,en;q=0.8"
