@@ -1,0 +1,22 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# 安装 openssl（Prisma 需要）
+RUN apk add --no-cache openssl
+
+# 复制依赖和代码
+COPY package*.json ./
+COPY prisma ./prisma/
+RUN npm ci
+
+COPY . .
+
+# 生成 Prisma 客户端
+RUN npx prisma generate
+
+# 构建
+RUN npm run build
+
+# 启动 Worker
+CMD ["node", "dist/worker.js"]

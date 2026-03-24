@@ -1,0 +1,118 @@
+# ============================================
+# SSL Manager - Git Ignore
+# ============================================
+
+# 依赖目录
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Next.js / Frontend
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# 环境变量和敏感配置
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+!.env.example
+
+# 证书和密钥（本地测试生成）
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.p12
+*.pfx
+certs/
+certificates/
+ssl/
+
+# 数据库
+*.db
+*.sqlite
+*.sqlite3
+prisma/*.db
+prisma/migrations/*/migration_lock.toml
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# 日志
+logs/
+*.log
+log/
+
+# 运行时数据
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# 测试覆盖率
+coverage/
+.nyc_output/
+
+# IDE 和编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# 操作系统文件
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+*.temp
+.cache/
+
+# 上传文件（如果有）
+uploads/
+storage/
+public/uploads/
+
+# Redis
+*.rdb
+*.aof
+dump.rdb
+appendonly.aof
+
+# TypeScript
+*.js.map
+*.d.ts.map
+
+# ESLint
+.eslintcache
+
+# 其他
+*.bak
+*.backup
+*.orig
+*.rej

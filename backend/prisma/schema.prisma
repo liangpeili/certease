@@ -1,0 +1,294 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String   @id @default(uuid())
+  email                String   @unique
+  passwordHash         String   @map("password_hash")
+  name                 String?
+  role                 String   @default("owner") // owner | admin | viewer
+  
+  // 登录安全
+  failedLoginCount     Int      @default(0) @map("failed_login_count")
+  lockedUntil          DateTime? @map("locked_until")
+  
+  // 通知偏好
+  notifyEmailEnabled   Boolean  @default(true) @map("notify_email_enabled")
+  notifyBeforeDays     Int      @default(7) @map("notify_before_days")
+  
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  
+  // 关联
+  acmeAccounts         AcmeAccount[]
+  dnsCredentials       DnsCredential[]
+  certificates         Certificate[]
+  webhookConfigs       WebhookConfig[]
+  apiKeys              ApiKey[]
+  renewalLogs          RenewalLog[]
+  auditLogs            AuditLog[]
+  notifications        Notification[]
+  
+  @@map("users")
+}
+
+model AcmeAccount {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  email         String
+  accountUrl    String?  @map("account_url")
+  privateKey    String   @map("private_key") // AES 加密存储
+  environment   String   @default("staging") // staging | production
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  certificates  Certificate[]
+  
+  @@index([userId])
+  @@map("acme_accounts")
+}
+
+model DnsCredential {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  
+  name          String
+  provider      String   // cloudflare | aliyun | tencentcloud
+  credentials   String   // AES 加密存储的 JSON
+  
+  // 验证状态
+  verified      Boolean  @default(false)
+  verifiedAt    DateTime? @map("verified_at")
+  zoneCount     Int?     @map("zone_count")
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  certificates  Certificate[]
+  
+  @@index([userId])
+  @@map("dns_credentials")
+}
+
+model Certificate {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  dnsCredentialId   String   @map("dns_credential_id")
+  acmeAccountId     String?  @map("acme_account_id")
+  
+  // 域名信息
+  domain            String
+  sanDomains        Json     @default("[]") @map("san_domains")
+  isWildcard        Boolean  @default(false) @map("is_wildcard")
+  
+  // 证书内容
+  fullchainPem      String?  @map("fullchain_pem")
+  privateKeyPem     String?  @map("private_key_pem") // AES 加密
+  certificatePem    String?  @map("certificate_pem")
+  
+  // 证书元数据
+  issuedAt          DateTime? @map("issued_at")
+  expiresAt         DateTime? @map("expires_at")
+  serialNumber      String?   @map("serial_number")
+  fingerprintSha256 String?   @map("fingerprint_sha256")
+  
+  // 状态机
+  status            String   @default("pending_initial")
+  // pending_initial | pending_renewal | processing | active | failed | expired | revoked
+  
+  // 自动续期配置
+  autoRenew         Boolean  @default(true) @map("auto_renew")
+  renewBeforeDays   Int      @default(30) @map("renew_before_days")
+  
+  // 失败追踪
+  failCount         Int      @default(0) @map("fail_count")
+  lastFailReason    String?  @map("last_fail_reason")
+  lastFailDetail    String?  @map("last_fail_detail")
+  lastFailAt        DateTime? @map("last_fail_at")
+  nextRetryAt       DateTime? @map("next_retry_at")
+  
+  // ACME 订单追踪
+  acmeOrderUrl      String?  @map("acme_order_url")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dnsCredential     DnsCredential @relation(fields: [dnsCredentialId], references: [id])
+  acmeAccount       AcmeAccount?  @relation(fields: [acmeAccountId], references: [id])
+  renewalLogs       RenewalLog[]
+  webhookLogs       WebhookLog[]
+  
+  @@unique([userId, domain])
+  @@index([userId])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([domain])
+  @@map("certificates")
+}
+
+model RenewalLog {
+  id              String   @id @default(uuid())
+  certificateId   String   @map("certificate_id")
+  
+  // 触发信息
+  triggerType     String   @map("trigger_type") // auto_cron | manual_single | manual_batch | manual_onboarding
+  triggeredBy     String?  @map("triggered_by")
+  
+  // 执行过程
+  startedAt       DateTime @default(now()) @map("started_at")
+  finishedAt      DateTime? @map("finished_at")
+  durationMs      Int?     @map("duration_ms")
+  
+  // 步骤明细
+  steps           Json     @default("[]")
+  
+  // 最终结果
+  result          String   @default("running") // running | success | failed
+  errorSummary    String?  @map("error_summary")
+  errorDetail     String?  @map("error_detail")
+  
+  // Worker 标识
+  workerId        String?  @map("worker_id")
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  certificate     Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  triggeredByUser User?    @relation(fields: [triggeredBy], references: [id])
+  
+  @@index([certificateId])
+  @@index([createdAt])
+  @@map("renewal_logs")
+}
+
+model WebhookConfig {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  
+  name              String
+  url               String
+  secret            String   // HMAC 签名密钥
+  
+  // 触发事件
+  events            Json     @default("[\"renewal_success\", \"renewal_failed\"]")
+  
+  // 关联的证书（空 = 全部）
+  certificateIds    Json?    @map("certificate_ids")
+  
+  // 状态
+  enabled           Boolean  @default(true)
+  lastTriggeredAt   DateTime? @map("last_triggered_at")
+  lastResponseCode  Int?     @map("last_response_code")
+  consecutiveFailures Int    @default(0) @map("consecutive_failures")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  webhookLogs       WebhookLog[]
+  
+  @@index([userId])
+  @@map("webhook_configs")
+}
+
+model WebhookLog {
+  id                String   @id @default(uuid())
+  webhookConfigId   String   @map("webhook_config_id")
+  certificateId     String?  @map("certificate_id")
+  
+  eventType         String   @map("event_type")
+  payload           Json     // 脱敏后的 payload
+  
+  // 推送结果
+  attempt           Int      @default(1)
+  responseCode      Int?     @map("response_code")
+  responseBody      String?  @map("response_body")
+  error             String?
+  
+  sentAt            DateTime @default(now()) @map("sent_at")
+  
+  webhookConfig     WebhookConfig @relation(fields: [webhookConfigId], references: [id], onDelete: Cascade)
+  certificate       Certificate?  @relation(fields: [certificateId], references: [id])
+  
+  @@index([webhookConfigId])
+  @@map("webhook_logs")
+}
+
+model ApiKey {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  
+  name        String
+  keyHash     String   @map("key_hash") // SHA-256 哈希
+  keyPrefix   String   @map("key_prefix") // 前 8 位用于显示
+  
+  // 权限范围
+  scopes      Json     @default("[\"certificates:read\"]")
+  
+  lastUsedAt  DateTime? @map("last_used_at")
+  expiresAt   DateTime? @map("expires_at")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([keyHash])
+  @@index([userId])
+  @@map("api_keys")
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  
+  action        String   // user.login | certificate.create | etc.
+  resourceType  String?  @map("resource_type")
+  resourceId    String?  @map("resource_id")
+  detail        Json?
+  
+  ipAddress     String?  @map("ip_address")
+  userAgent     String?  @map("user_agent")
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@index([resourceType, resourceId])
+  @@map("audit_logs")
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  
+  type        String   // success | error | warning
+  title       String
+  message     String
+  
+  // 关联资源
+  resourceType String? @map("resource_type")
+  resourceId   String? @map("resource_id")
+  
+  // 状态
+  read        Boolean  @default(false)
+  readAt      DateTime? @map("read_at")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@index([read])
+  @@map("notifications")
+}
