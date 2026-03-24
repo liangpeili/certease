@@ -53,14 +53,16 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const response: any = await authApi.register({
+      const result: any = await authApi.register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
       });
-      // 处理两种可能的响应格式
-      const user = response.data?.user || response.user;
-      const token = response.data?.token || response.token;
+      // API interceptor returns response.data directly
+      const response = result.data || result;
+      const user = response.user;
+      const token = response.token;
+      console.log('Register response:', { user, token });
       if (!user || !token) {
         setError(t('registerError'));
         return;

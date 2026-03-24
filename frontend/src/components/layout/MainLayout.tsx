@@ -21,8 +21,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       }
 
       try {
-        const response: any = await authApi.getMe();
-        setUser(response.data.user);
+        const result: any = await authApi.getMe();
+        // API interceptor returns response.data directly
+        const response = result.data || result;
+        setUser(response.user);
       } catch {
         logout();
         router.push('/login');

@@ -27,10 +27,13 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response: any = await authApi.login(formData);
-      // 处理两种可能的响应格式
-      const user = response.data?.user || response.user;
-      const token = response.data?.token || response.token;
+      const result: any = await authApi.login(formData);
+      // API interceptor returns response.data directly
+      // Backend format: {success: true, data: {user, token}}
+      const response = result.data || result;
+      const user = response.user;
+      const token = response.token;
+      console.log('Login response:', { user, token });
       if (!user || !token) {
         setError(t('loginError'));
         return;
