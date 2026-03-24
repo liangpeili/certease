@@ -114,7 +114,7 @@ export const paginationSchema = z.object({
 export const certificateListQuerySchema = paginationSchema.extend({
   status: z.enum(['active', 'pending_initial', 'pending_renewal', 'processing', 'failed', 'expired', 'revoked']).optional(),
   search: z.string().optional(),
-  sort: z.enum(['created_at', 'expires_at', 'domain']).default('created_at'),
+  sort: z.enum(['createdAt', 'expiresAt', 'domain']).default('createdAt'),
   order: z.enum(['asc', 'desc']).default('desc'),
 });
 

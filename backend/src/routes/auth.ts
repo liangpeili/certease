@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../utils/prisma';
 import { hashPassword, verifyPassword } from '../utils/crypto';
-import { generateToken } from '../middleware/auth';
+import { generateToken, authenticate } from '../middleware/auth';
 import { asyncHandler } from '../middleware/errorHandler';
 import { registerSchema, loginSchema, emailSchema } from '../utils/validation';
 import { AppError } from '../middleware/errorHandler';
@@ -155,8 +155,7 @@ router.get('/check-email', asyncHandler(async (req, res) => {
 }));
 
 // 获取当前用户信息（需要认证）
-router.get('/me', asyncHandler(async (req, res) => {
-  // 这里需要 authenticate 中间件
+router.get('/me', authenticate, asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   
   if (!userId) {
