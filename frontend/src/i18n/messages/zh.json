@@ -40,6 +40,7 @@
     "required": "必填"
   },
   "auth": {
+    "loading": "加载中...",
     "login": "登录",
     "loginTitle": "登录您的账户",
     "loginSubtitle": "输入凭据以访问您的账户",

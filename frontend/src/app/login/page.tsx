@@ -64,7 +64,10 @@ export default function LoginPage() {
               {t('email')}
             </label>
             <Input
+              id="email"
+              name="email"
               type="email"
+              autoComplete="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder={t('emailPlaceholder')}
@@ -79,7 +82,10 @@ export default function LoginPage() {
             </label>
             <div className="relative">
               <Input
+                id="password"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder={t('passwordPlaceholder')}

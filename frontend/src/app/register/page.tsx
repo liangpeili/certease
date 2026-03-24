@@ -94,7 +94,10 @@ export default function RegisterPage() {
               {t('name')}
             </label>
             <Input
+              id="name"
+              name="name"
               type="text"
+              autoComplete="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder={t('namePlaceholder')}
@@ -108,7 +111,10 @@ export default function RegisterPage() {
               {t('email')}
             </label>
             <Input
+              id="email"
+              name="email"
               type="email"
+              autoComplete="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder={t('emailPlaceholder')}
@@ -123,7 +129,10 @@ export default function RegisterPage() {
             </label>
             <div className="relative">
               <Input
+                id="password"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder={t('passwordPlaceholder')}

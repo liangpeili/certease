@@ -40,6 +40,7 @@
     "required": "Required"
   },
   "auth": {
+    "loading": "Loading...",
     "login": "Sign In",
     "loginTitle": "Sign in to your account",
     "loginSubtitle": "Enter your credentials to access your account",
