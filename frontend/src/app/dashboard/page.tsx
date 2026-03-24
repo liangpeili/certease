@@ -38,8 +38,10 @@ export default function DashboardPage() {
 
   const fetchSummary = async () => {
     try {
-      const response: any = await certificateApi.getSummary();
-      setSummary(response.data);
+      const result: any = await certificateApi.getSummary();
+      // API interceptor returns response.data directly
+      const response = result.data || result;
+      setSummary(response);
     } catch (error) {
       console.error('Failed to fetch summary:', error);
     } finally {

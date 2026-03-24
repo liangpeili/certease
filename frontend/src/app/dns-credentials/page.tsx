@@ -32,8 +32,10 @@ export default function DnsCredentialsPage() {
   const fetchCredentials = async () => {
     setIsLoading(true);
     try {
-      const response: any = await dnsCredentialApi.list();
-      setCredentials(response.data.items);
+      const result: any = await dnsCredentialApi.list();
+      // API interceptor returns response.data directly
+      const response = result.data || result;
+      setCredentials(response.items || []);
     } catch (error) {
       console.error('Failed to fetch credentials:', error);
     } finally {
