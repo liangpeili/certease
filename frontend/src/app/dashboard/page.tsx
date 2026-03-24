@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Shield,
   AlertTriangle,
@@ -32,7 +32,7 @@ interface DashboardSummary {
 }
 
 export default function DashboardPage() {
-  const router = useRouter();
+  const t = useTranslations();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,7 +51,6 @@ export default function DashboardPage() {
     fetchSummary();
   }, []);
 
-  // 如果有正在处理的证书，轮询更新
   useEffect(() => {
     if (!summary?.hasProcessing) return;
 
@@ -71,28 +70,28 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: '证书总数',
+      title: t('dashboard.totalCertificates'),
       value: summary?.total || 0,
       color: 'blue',
       icon: Shield,
       href: '/certificates',
     },
     {
-      title: '即将到期 (≤30天)',
+      title: t('dashboard.expiringSoon'),
       value: summary?.expiring30d || 0,
       color: 'yellow',
       icon: Clock,
       href: '/certificates?filter=expiring',
     },
     {
-      title: '续期失败',
+      title: t('dashboard.renewalFailed'),
       value: summary?.byStatus?.failed || 0,
       color: 'red',
       icon: AlertCircle,
       href: '/certificates?status=failed',
     },
     {
-      title: '已过期',
+      title: t('dashboard.expired'),
       value: summary?.byStatus?.expired || 0,
       color: 'gray',
       icon: AlertTriangle,
@@ -113,11 +112,11 @@ export default function DashboardPage() {
   return (
     <MainLayout>
       <div className="space-y-8">
-        {/* 页面标题 */}
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-500 mt-1">概览您的 SSL 证书状态</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
+            <p className="text-gray-500 mt-1">{t('dashboard.subtitle')}</p>
           </div>
           <Button
             variant="outline"
@@ -125,11 +124,11 @@ export default function DashboardPage() {
             className="flex items-center gap-2"
           >
             <RefreshCw size={16} />
-            刷新
+            {t('common.refresh')}
           </Button>
         </div>
 
-        {/* 统计卡片 */}
+        {/* Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {statCards.map((card) => (
             <Link
@@ -148,30 +147,30 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* 即将到期列表 */}
+        {/* Expiring Soon */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">即将到期的证书</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.expiringSoon')}</h2>
           </div>
           <div className="p-6">
             {summary && summary.expiring7d === 0 ? (
               <div className="flex items-center justify-center py-8 text-gray-500">
                 <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                所有证书状态健康，暂无即将到期的证书
+                {t('dashboard.healthyStatus')}
               </div>
             ) : (
               <div className="text-gray-500 text-center py-8">
                 <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                查看证书列表获取详细信息
+                View certificate list for details
               </div>
             )}
           </div>
         </div>
 
-        {/* 最近活动 */}
+        {/* Recent Activity */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">最近活动</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivity')}</h2>
           </div>
           <div className="divide-y divide-gray-200">
             {summary?.recentLogs && summary.recentLogs.length > 0 ? (
@@ -188,15 +187,15 @@ export default function DashboardPage() {
                       <span className={status.color}>{status.icon}</span>
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          {log.domain} - {log.result === 'success' ? '续期成功' : '续期失败'}
+                          {log.domain} - {log.result === 'success' ? 'Success' : 'Failed'}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                           {log.triggerType === 'auto_cron'
-                            ? '自动巡检'
+                            ? 'Auto'
                             : log.triggerType === 'manual_single'
-                            ? '手动触发'
-                            : '批量续期'}
-                          {log.durationMs && ` · 耗时 ${Math.round(log.durationMs / 1000)}s`}
+                            ? 'Manual'
+                            : 'Batch'}
+                          {log.durationMs && ` · ${Math.round(log.durationMs / 1000)}s`}
                         </p>
                       </div>
                     </div>
@@ -208,7 +207,7 @@ export default function DashboardPage() {
               })
             ) : (
               <div className="px-6 py-8 text-center text-gray-500">
-                暂无活动记录
+                {t('dashboard.noActivity')}
               </div>
             )}
           </div>

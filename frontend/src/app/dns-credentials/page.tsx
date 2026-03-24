@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Globe, Check, X, Trash2, RefreshCw } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Plus, Check, X, Trash2, RefreshCw } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import { dnsCredentialApi } from '@/lib/api';
 import { getDnsProviderInfo } from '@/lib/utils';
@@ -17,6 +18,7 @@ interface DnsCredential {
 }
 
 export default function DnsCredentialsPage() {
+  const t = useTranslations();
   const [credentials, setCredentials] = useState<DnsCredential[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -72,7 +74,7 @@ export default function DnsCredentialsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除这个凭据吗？')) return;
+    if (!confirm(t('common.confirm'))) return;
     try {
       await dnsCredentialApi.delete(id);
       fetchCredentials();
@@ -86,36 +88,36 @@ export default function DnsCredentialsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">DNS 凭据</h1>
-            <p className="text-gray-500 mt-1">管理您的 DNS 服务商 API 凭据</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('dnsCredentials.title')}</h1>
+            <p className="text-gray-500 mt-1">{t('dnsCredentials.subtitle')}</p>
           </div>
           <Button
             onClick={() => setShowForm(true)}
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="h-4 w-4 mr-2" />
-            添加凭据
+            {t('dnsCredentials.addCredential')}
           </Button>
         </div>
 
         {showForm && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold mb-4">添加 DNS 凭据</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('dnsCredentials.create.title')}</h2>
             <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  名称
+                  {t('dnsCredentials.create.name')}
                 </label>
                 <Input
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="例如：我的 Cloudflare 账号"
+                  placeholder={t('dnsCredentials.create.namePlaceholder')}
                   required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  服务商
+                  {t('common.name')}
                 </label>
                 <select
                   value={formData.provider}
@@ -123,35 +125,33 @@ export default function DnsCredentialsPage() {
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                 >
                   <option value="cloudflare">Cloudflare</option>
-                  <option value="aliyun">阿里云</option>
-                  <option value="tencentcloud">腾讯云</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  API Token
+                  {t('dnsCredentials.create.apiToken')}
                 </label>
                 <Input
                   type="password"
                   value={formData.apiToken}
                   onChange={(e) => setFormData({ ...formData, apiToken: e.target.value })}
-                  placeholder="输入 API Token"
+                  placeholder={t('dnsCredentials.create.apiTokenPlaceholder')}
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  需要 Zone.DNS 编辑权限
+                  {t('dnsCredentials.create.apiTokenHint')}
                 </p>
               </div>
               <div className="flex gap-3">
                 <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                  保存
+                  {t('common.save')}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setShowForm(false)}
                 >
-                  取消
+                  {t('common.cancel')}
                 </Button>
               </div>
             </form>
@@ -163,19 +163,19 @@ export default function DnsCredentialsPage() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  名称
+                  {t('common.name')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  服务商
+                  {t('dnsCredentials.provider')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  状态
+                  {t('common.status')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Zone 数量
+                  {t('dnsCredentials.zoneCount')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                  操作
+                  {t('common.actions')}
                 </th>
               </tr>
             </thead>
@@ -189,7 +189,7 @@ export default function DnsCredentialsPage() {
               ) : credentials.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-gray-500">
-                    暂无 DNS 凭据，请添加一个
+                    {t('dnsCredentials.noCredentials')}
                   </td>
                 </tr>
               ) : (
@@ -208,11 +208,11 @@ export default function DnsCredentialsPage() {
                       <td className="px-6 py-4">
                         {cred.verified ? (
                           <span className="inline-flex items-center gap-1 text-green-600 text-sm">
-                            <Check className="h-4 w-4" /> 已验证
+                            <Check className="h-4 w-4" /> {t('dnsCredentials.verified')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-red-600 text-sm">
-                            <X className="h-4 w-4" /> 未验证
+                            <X className="h-4 w-4" /> {t('dnsCredentials.unverified')}
                           </span>
                         )}
                       </td>
@@ -232,7 +232,7 @@ export default function DnsCredentialsPage() {
                             ) : (
                               <RefreshCw className="h-4 w-4" />
                             )}
-                            验证
+                            {t('dnsCredentials.verify')}
                           </Button>
                           <Button
                             variant="ghost"

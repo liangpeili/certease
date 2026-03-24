@@ -3,15 +3,18 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Shield, Eye, EyeOff, Check, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { authApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const t = useTranslations('auth');
   const { login } = useAuthStore();
   const [formData, setFormData] = useState({
     name: '',
@@ -23,7 +26,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // 密码强度检查
+  // Password strength checks
   const passwordChecks = {
     length: formData.password.length >= 8,
     letter: /[a-zA-Z]/.test(formData.password),
@@ -38,12 +41,12 @@ export default function RegisterPage() {
     setError('');
 
     if (!isPasswordValid) {
-      setError('密码不符合要求');
+      setError(t('passwordRequirements'));
       return;
     }
 
     if (!isPasswordMatch) {
-      setError('两次输入的密码不一致');
+      setError(t('passwordMismatch'));
       return;
     }
 
@@ -58,7 +61,7 @@ export default function RegisterPage() {
       login(response.data.user, response.data.token);
       router.push('/onboarding');
     } catch (err: any) {
-      setError(err.message || '注册失败');
+      setError(err.message || t('registerError'));
     } finally {
       setIsLoading(false);
     }
@@ -67,12 +70,16 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl">
+        <div className="absolute top-4 right-4">
+          <LanguageSwitcher />
+        </div>
+        
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
             <Shield className="w-8 h-8 text-blue-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">创建账户</h1>
-          <p className="text-gray-500 mt-2">开始管理您的 SSL 证书</p>
+          <h1 className="text-2xl font-bold text-gray-900">CertEase</h1>
+          <p className="text-gray-500 mt-2">{t('registerTitle')}</p>
         </div>
 
         {error && (
@@ -84,13 +91,13 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              姓名
+              {t('name')}
             </label>
             <Input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="您的姓名"
+              placeholder={t('namePlaceholder')}
               required
               className="h-11"
             />
@@ -98,13 +105,13 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              邮箱地址
+              {t('email')}
             </label>
             <Input
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="your@email.com"
+              placeholder={t('emailPlaceholder')}
               required
               className="h-11"
             />
@@ -112,14 +119,14 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              密码
+              {t('password')}
             </label>
             <div className="relative">
               <Input
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder="创建密码"
+                placeholder={t('passwordPlaceholder')}
                 required
                 className="h-11 pr-10"
               />
@@ -132,41 +139,40 @@ export default function RegisterPage() {
               </button>
             </div>
             
-            {/* 密码强度指示器 */}
             <div className="mt-3 space-y-2">
               <div className={cn(
                 "flex items-center text-xs",
                 passwordChecks.length ? "text-green-600" : "text-gray-500"
               )}>
                 {passwordChecks.length ? <Check size={14} className="mr-1" /> : <X size={14} className="mr-1" />}
-                至少 8 个字符
+                {t('passwordRequirements').split(',')[0]}
               </div>
               <div className={cn(
                 "flex items-center text-xs",
                 passwordChecks.letter ? "text-green-600" : "text-gray-500"
               )}>
                 {passwordChecks.letter ? <Check size={14} className="mr-1" /> : <X size={14} className="mr-1" />}
-                包含字母
+                Contains letter
               </div>
               <div className={cn(
                 "flex items-center text-xs",
                 passwordChecks.number ? "text-green-600" : "text-gray-500"
               )}>
                 {passwordChecks.number ? <Check size={14} className="mr-1" /> : <X size={14} className="mr-1" />}
-                包含数字
+                Contains number
               </div>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              确认密码
+              {t('confirmPassword')}
             </label>
             <Input
               type="password"
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-              placeholder="再次输入密码"
+              placeholder={t('confirmPasswordPlaceholder')}
               required
               className={cn(
                 "h-11",
@@ -174,7 +180,7 @@ export default function RegisterPage() {
               )}
             />
             {formData.confirmPassword && !isPasswordMatch && (
-              <p className="mt-1 text-xs text-red-600">密码不匹配</p>
+              <p className="mt-1 text-xs text-red-600">{t('passwordMismatch')}</p>
             )}
           </div>
 
@@ -183,15 +189,15 @@ export default function RegisterPage() {
             disabled={isLoading}
             className="w-full h-11 bg-blue-600 hover:bg-blue-700"
           >
-            {isLoading ? '创建账户...' : '创建账户'}
+            {isLoading ? t('loading') : t('register')}
           </Button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            已有账户？{' '}
+            {t('hasAccount')}{' '}
             <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
-              直接登录
+              {t('login')}
             </Link>
           </p>
         </div>

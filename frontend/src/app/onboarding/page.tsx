@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ArrowRight, CheckCircle, Globe, Shield, Key } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -8,29 +9,30 @@ import Link from 'next/link';
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const t = useTranslations();
 
   const steps = [
     {
       icon: Key,
-      title: '添加 DNS 凭据',
-      description: '添加您的 Cloudflare API Token 或其他 DNS 服务商凭据',
-      action: '添加凭据',
+      title: t('onboarding.step1.title'),
+      description: t('onboarding.step1.description'),
+      action: t('dnsCredentials.addCredential'),
       href: '/dns-credentials',
       color: 'bg-blue-100 text-blue-600',
     },
     {
       icon: Globe,
-      title: '添加域名',
-      description: '添加您要管理的域名并签发 SSL 证书',
-      action: '添加域名',
+      title: t('onboarding.step2.title'),
+      description: t('onboarding.step2.description'),
+      action: t('certificates.addCertificate'),
       href: '/certificates/new',
       color: 'bg-green-100 text-green-600',
     },
     {
       icon: Shield,
-      title: '查看证书',
-      description: '查看和管理您已签发的证书',
-      action: '查看证书',
+      title: t('onboarding.step3.title'),
+      description: t('onboarding.step3.description'),
+      action: t('nav.certificates'),
       href: '/certificates',
       color: 'bg-purple-100 text-purple-600',
     },
@@ -44,10 +46,10 @@ export default function OnboardingPage() {
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            欢迎注册 SSL Manager！
+            {t('onboarding.title')}
           </h1>
           <p className="text-gray-600 text-lg">
-            让我们开始设置您的 SSL 证书管理
+            {t('onboarding.subtitle')}
           </p>
         </div>
 
@@ -86,7 +88,7 @@ export default function OnboardingPage() {
         <div className="mt-12 text-center">
           <Link href="/dashboard">
             <Button variant="ghost" className="text-gray-500">
-              跳过，前往 Dashboard
+              {t('onboarding.skip')}
             </Button>
           </Link>
         </div>

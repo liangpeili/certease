@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -10,23 +11,25 @@ import {
   Settings,
   Webhook,
 } from 'lucide-react';
-
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: '证书管理', href: '/certificates', icon: Shield },
-  { name: 'DNS 凭据', href: '/dns-credentials', icon: Globe },
-  { name: 'Webhook', href: '/webhooks', icon: Webhook },
-  { name: '设置', href: '/settings', icon: Settings },
-];
+import LanguageSwitcher from '../LanguageSwitcher';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const t = useTranslations('nav');
+
+  const navigation = [
+    { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { name: t('certificates'), href: '/certificates', icon: Shield },
+    { name: t('dnsCredentials'), href: '/dns-credentials', icon: Globe },
+    { name: t('webhooks'), href: '/webhooks', icon: Webhook },
+    { name: t('settings'), href: '/settings', icon: Settings },
+  ];
 
   return (
     <div className="flex h-full w-64 flex-col bg-slate-900 text-white">
       <div className="flex h-16 items-center px-6 border-b border-slate-800">
         <Shield className="h-8 w-8 text-blue-400 mr-3" />
-        <span className="text-xl font-bold">SSL Manager</span>
+        <span className="text-xl font-bold">CertEase</span>
       </div>
       
       <nav className="flex-1 px-4 py-6 space-y-1">
@@ -50,9 +53,10 @@ export default function Sidebar() {
         })}
       </nav>
       
-      <div className="p-4 border-t border-slate-800">
+      <div className="p-4 border-t border-slate-800 space-y-4">
+        <LanguageSwitcher />
         <div className="text-xs text-slate-500 text-center">
-          SSL Certificate Manager v1.0
+          CertEase v1.0
         </div>
       </div>
     </div>
