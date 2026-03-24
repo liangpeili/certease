@@ -1,4 +1,4 @@
-# SSL Manager - 实现总结
+# CertEase - 实现总结
 
 ## 已完成的功能
 
@@ -102,7 +102,7 @@
 ## 项目结构
 
 ```
-ssl-manager/
+certease/
 ├── backend/
 │   ├── src/
 │   │   ├── middleware/       # 认证、错误处理、日志

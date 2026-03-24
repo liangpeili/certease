@@ -1,5 +1,5 @@
 {
-  "name": "ssl-manager-backend",
+  "name": "certease-backend",
   "version": "1.0.0",
   "description": "SSL Certificate Auto-Management Platform Backend",
   "main": "dist/index.js",

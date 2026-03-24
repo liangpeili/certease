@@ -2,7 +2,7 @@
 
 # 默认目标
 help:
-	@echo "SSL Manager 构建工具"
+	@echo "CertEase 构建工具"
 	@echo ""
 	@echo "可用命令:"
 	@echo "  make build         - 构建所有 Docker 镜像"

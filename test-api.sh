@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# SSL Manager API 测试脚本
+# CertEase API 测试脚本
 # 使用: ./test-api.sh
 
 BASE_URL="http://localhost:3001"
 
 echo "========================================="
-echo "SSL Manager API 测试"
+echo "CertEase API 测试"
 echo "========================================="
 
 # 1. 健康检查
